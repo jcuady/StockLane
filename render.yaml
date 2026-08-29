@@ -1,0 +1,102 @@
+# Optional Render blueprint sketch for portfolio demos.
+# Adjust plan names and add real secrets in the Render dashboard -- never commit secrets.
+
+services:
+  - type: web
+    name: stocklane-web
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: stocklane-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: stocklane-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: stocklane-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: stocklane-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: stocklane-db
+          property: password
+      - key: QUEUE_CONNECTION
+        value: redis
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: stocklane-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: stocklane-redis
+          property: port
+      - key: PAYMONGO_WEBHOOK_SECRET
+        sync: false
+      - key: BUSYBEE_API_KEY
+        sync: false
+
+  - type: worker
+    name: stocklane-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: php artisan queue:work redis --sleep=1 --tries=3
+    plan: starter
+    envVars:
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: APP_ENV
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_HOST
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_DATABASE
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_USERNAME
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_PASSWORD
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: REDIS_HOST
+      - key: QUEUE_CONNECTION
+        value: redis
+
+  - type: redis
+    name: stocklane-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: stocklane-db
+    plan: basic-256mb
+    databaseName: stocklane
+    user: stocklane
