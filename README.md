@@ -29,6 +29,28 @@ flowchart LR
   Inventory --> Redis
 ```
 
+## Local run (Windows, no Docker)
+
+Portable PHP used for verification: `C:\Users\jcuad\AppData\Local\Programs\php83\php.exe`
+
+```bash
+cd backend
+# copy ../.env.example to .env and set DB_CONNECTION=sqlite + DB_DATABASE absolute path
+php artisan key:generate
+php artisan migrate --force
+php artisan stocklane:seed-demo
+npm install && npm run build
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+Open http://127.0.0.1:8000 — inventory board (sale / restock).
+
+```bash
+php artisan test
+```
+
+Expected: 6 passed.
+
 ## Stack
 
 | Layer | Choice |

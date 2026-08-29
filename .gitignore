@@ -35,6 +35,8 @@ Thumbs.db
 # Tests / coverage
 /backend/.phpunit.result.cache
 /backend/coverage/
+/backend/database/*.sqlite
+/backend/database/*.sqlite-journal
 
 # Docker
 *.log

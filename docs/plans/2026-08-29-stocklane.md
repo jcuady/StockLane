@@ -9,7 +9,20 @@
 **Tech Stack:** Laravel 12-shaped PHP, Inertia + React + Vite, MySQL 8, Redis, Sanctum, PHPUnit, Docker (php-fpm + nginx).
 
 Date: 2026-08-29
-Status: scaffold complete; ready for `composer install` + Docker bring-up
+Status: **IMPLEMENTED locally** — composer install, migrate, seed, 6/6 PHPUnit pass, Vite production build, HTTP smoke
+
+## Verification (executed 2026-08-30)
+
+```
+php artisan key:generate
+php artisan migrate --force
+php artisan stocklane:seed-demo
+php artisan test          # 6 passed (23 assertions)
+npm install && npm run build
+php artisan serve         # GET / 200 with Inertia board
+```
+
+PHP portable: `C:\Users\jcuad\AppData\Local\Programs\php83\php.exe`
 
 ## Goal (detail)
 
