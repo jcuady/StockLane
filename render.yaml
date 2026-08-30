@@ -1,5 +1,5 @@
-# Optional Render blueprint sketch for portfolio demos.
-# Adjust plan names and add real secrets in the Render dashboard -- never commit secrets.
+# StockLane Render blueprint (portfolio). Set APP_KEY + secrets in dashboard.
+# Web listens on $PORT via php artisan serve (see backend/Dockerfile).
 
 services:
   - type: web
@@ -7,15 +7,22 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: starter
-    healthCheckPath: /
+    dockerCommand: web
+    plan: free
+    healthCheckPath: /up
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
+      - key: APP_KEY
+        sync: false
       - key: APP_URL
         sync: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: RUN_MIGRATIONS
+        value: "true"
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
@@ -38,21 +45,19 @@ services:
         fromDatabase:
           name: stocklane-db
           property: password
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
       - key: QUEUE_CONNECTION
-        value: redis
-      - key: REDIS_HOST
-        fromService:
-          type: redis
-          name: stocklane-redis
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: redis
-          name: stocklane-redis
-          property: port
+        value: database
+      - key: FILESYSTEM_DISK
+        value: local
       - key: PAYMONGO_WEBHOOK_SECRET
         sync: false
       - key: BUSYBEE_API_KEY
+        sync: false
+      - key: LOW_STOCK_SMS_TO
         sync: false
 
   - type: worker
@@ -60,8 +65,8 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    dockerCommand: php artisan queue:work redis --sleep=1 --tries=3
-    plan: starter
+    dockerCommand: worker
+    plan: free
     envVars:
       - fromService:
           type: web
@@ -70,7 +75,19 @@ services:
       - fromService:
           type: web
           name: stocklane-web
+          envVarKey: APP_KEY
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_CONNECTION
+      - fromService:
+          type: web
+          name: stocklane-web
           envVarKey: DB_HOST
+      - fromService:
+          type: web
+          name: stocklane-web
+          envVarKey: DB_PORT
       - fromService:
           type: web
           name: stocklane-web
@@ -83,20 +100,15 @@ services:
           type: web
           name: stocklane-web
           envVarKey: DB_PASSWORD
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: REDIS_HOST
       - key: QUEUE_CONNECTION
-        value: redis
-
-  - type: redis
-    name: stocklane-redis
-    plan: starter
-    maxmemoryPolicy: noeviction
+        value: database
+      - key: RUN_MIGRATIONS
+        value: "false"
+      - key: LOG_CHANNEL
+        value: stderr
 
 databases:
   - name: stocklane-db
-    plan: basic-256mb
+    plan: free
     databaseName: stocklane
     user: stocklane
