@@ -120,13 +120,29 @@ php artisan queue:work redis
 - PayMongo signature verification is structured for production but uses a documented test secret from `.env.example` only
 - No real secrets are committed
 
+## Deploy (Render free tier)
+
+Blueprint: [`render.yaml`](render.yaml)
+
+- **Web:** Docker (`backend/Dockerfile`) on Free web
+- **DB:** Free Render **Postgres** (not MySQL -- free MySQL is not available)
+- **Queue:** `QUEUE_CONNECTION=sync` on the web process (Free plan has no workers)
+- **APP_KEY:** leave blank; `docker/entrypoint.sh` generates a Laravel `base64:...` key on boot
+- Optional: set `APP_URL`, PayMongo / BusyBee secrets in the dashboard
+
+```text
+Render Dashboard -> New -> Blueprint -> connect jcuady/StockLane
+```
+
+Local/Docker still use MySQL + Redis when you want the full LAMP/queue shape.
+
 ## GitHub-ready
 
 - ASCII punctuation only in docs and configs
 - `.env.example` with safe defaults
 - `.gitignore` excludes `.env`, vendor, node_modules, built assets
 - Feature tests for inventory and webhooks
-- Optional `render.yaml` for a Render blueprint sketch
+- CI blueprint in `_deploy_local/ci.yml` (push to `.github/workflows/` needs GitHub `workflow` scope)
 
 ## License
 

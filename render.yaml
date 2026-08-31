@@ -1,5 +1,6 @@
-# StockLane Render blueprint (portfolio). Set APP_KEY + secrets in dashboard.
-# Web listens on $PORT via php artisan serve (see backend/Dockerfile).
+# StockLane Render blueprint (free-tier capable).
+# Free web + Free Postgres. Queue runs sync on the web process (no free workers).
+# Set APP_KEY blank (entrypoint generates Laravel base64 key) and optional webhook secrets.
 
 services:
   - type: web
@@ -24,7 +25,7 @@ services:
       - key: RUN_MIGRATIONS
         value: "true"
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_HOST
         fromDatabase:
           name: stocklane-db
@@ -46,11 +47,11 @@ services:
           name: stocklane-db
           property: password
       - key: SESSION_DRIVER
-        value: file
-      - key: CACHE_STORE
-        value: file
-      - key: QUEUE_CONNECTION
         value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
       - key: FILESYSTEM_DISK
         value: local
       - key: PAYMONGO_WEBHOOK_SECRET
@@ -59,53 +60,6 @@ services:
         sync: false
       - key: LOW_STOCK_SMS_TO
         sync: false
-
-  - type: worker
-    name: stocklane-worker
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    dockerCommand: worker
-    plan: free
-    envVars:
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: APP_ENV
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: APP_KEY
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_CONNECTION
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_HOST
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_PORT
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_DATABASE
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_USERNAME
-      - fromService:
-          type: web
-          name: stocklane-web
-          envVarKey: DB_PASSWORD
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: RUN_MIGRATIONS
-        value: "false"
-      - key: LOG_CHANNEL
-        value: stderr
 
 databases:
   - name: stocklane-db
