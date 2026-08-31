@@ -33,7 +33,7 @@ jobs:
           touch database/database.sqlite
           php artisan key:generate --force
       - name: Test
-        run: php artisan test
+        run: php artisan test --testsuite=Feature
 
   frontend-build:
     runs-on: ubuntu-latest

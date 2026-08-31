@@ -4,12 +4,14 @@ set -eu
 cd /var/www/html
 
 # Laravel requires APP_KEY like base64:... — Render generateValue is often plain random.
+# Only mint a key when missing/invalid so a dashboard-set key sticks across restarts.
 case "${APP_KEY:-}" in
   base64:*)
     ;;
   *)
     export APP_KEY="$(php artisan key:generate --force --show)"
     echo "Normalized APP_KEY to Laravel base64 format for this boot"
+    echo "Set APP_KEY in the host dashboard to keep sessions stable across restarts"
     ;;
 esac
 
@@ -18,6 +20,10 @@ chmod -R ug+rwx storage bootstrap/cache || true
 
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   php artisan migrate --force || echo "migrate skipped/failed; continuing"
+fi
+
+if [ "${RUN_SEED:-false}" = "true" ]; then
+  php artisan stocklane:seed-demo || echo "seed skipped/failed; continuing"
 fi
 
 ROLE="${1:-web}"

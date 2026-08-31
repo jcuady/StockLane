@@ -1,6 +1,6 @@
 # StockLane Render blueprint (free-tier capable).
 # Free web + Free Postgres. Queue runs sync on the web process (no free workers).
-# Set APP_KEY blank (entrypoint generates Laravel base64 key) and optional webhook secrets.
+# Leave APP_KEY blank on first create, copy the generated value from logs into the dashboard.
 
 services:
   - type: web
@@ -24,6 +24,8 @@ services:
         value: stderr
       - key: RUN_MIGRATIONS
         value: "true"
+      - key: RUN_SEED
+        value: "true"
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -46,10 +48,12 @@ services:
         fromDatabase:
           name: stocklane-db
           property: password
+      - key: DB_SSLMODE
+        value: require
       - key: SESSION_DRIVER
-        value: database
+        value: file
       - key: CACHE_STORE
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
         value: sync
       - key: FILESYSTEM_DISK

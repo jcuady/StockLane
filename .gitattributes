@@ -1,0 +1,4 @@
+# Force LF for shell scripts used as Docker ENTRYPOINT (CRLF breaks shebang on Linux)
+*.sh text eol=lf
+Dockerfile text eol=lf
+**/Dockerfile text eol=lf
