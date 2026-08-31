@@ -1,0 +1,51 @@
+# GitHub Actions — verify StockLane builds before deploy
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  php-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite, sqlite3, zip
+          coverage: none
+      - name: Composer
+        run: composer install --no-interaction --prefer-dist
+      - name: Env
+        run: |
+          cp ../.env.example .env
+          php -r "file_put_contents('.env', preg_replace('/DB_CONNECTION=.*/','DB_CONNECTION=sqlite', file_get_contents('.env')));"
+          php -r "file_put_contents('.env', preg_replace('/DB_HOST=.*/','# DB_HOST=', file_get_contents('.env')));"
+          echo "DB_DATABASE=${{ github.workspace }}/backend/database/database.sqlite" >> .env
+          echo "SESSION_DRIVER=array" >> .env
+          echo "CACHE_STORE=array" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
+          touch database/database.sqlite
+          php artisan key:generate --force
+      - name: Test
+        run: php artisan test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run build
