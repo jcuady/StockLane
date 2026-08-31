@@ -44,6 +44,11 @@
         ],
         "test": [
             "@php artisan test"
+        ],
+        "vercel": [
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear"
         ]
     },
     "extra": {

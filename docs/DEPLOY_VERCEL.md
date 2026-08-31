@@ -9,10 +9,13 @@ StockLane is a **Laravel + Inertia** app. Vite assets land in `public/build`, no
 | Setting | Value |
 |---------|--------|
 | **Root Directory** | `backend` |
-| **Framework Preset** | Other (or auto; `framework: null` in vercel.json overrides) |
-| **Build Command** | *(from `backend/vercel.json`)* |
+| **Framework Preset** | Other (`framework: null` in vercel.json) |
+| **Node.js Version** | 20.x (matches `package.json` engines) |
+| **Install Command** | `npm ci` only — **do not** call `composer` here |
+| **Build Command** | `npm run build` |
 | **Output Directory** | `public` |
-| **Install Command** | *(from `backend/vercel.json`)* |
+
+**Why no `composer` in Install Command:** Vercel's install step runs in a Node-only shell. The `vercel-php` runtime installs PHP dependencies automatically when it packages `api/index.php`. Calling `composer install` in `installCommand` fails with `composer: command not found` (exit 127).
 
 If Root Directory is `backend`, Vercel uses `backend/vercel.json`.
 
@@ -47,10 +50,11 @@ Optional portfolio placeholders: `PAYMONGO_WEBHOOK_SECRET`, `BUSYBEE_API_KEY`, `
 
 ```bash
 cd backend
-composer install --no-dev --optimize-autoloader
 npm ci && npm run build
 # Assets must exist under public/build (not dist)
 ls public/build
+# Composer is for local/Render/Docker only — vercel-php runs it on deploy
+composer install --no-dev --optimize-autoloader
 ```
 
 ## One-click Render (permanent production)
