@@ -147,3 +147,12 @@ Local/Docker still use MySQL + Redis when you want the full LAMP/queue shape.
 ## License
 
 MIT -- portfolio use.
+
+## Live smoke (session)
+
+When a Cloudflare tunnel is running against local `php artisan serve`:
+
+- App: see `Resume/live_smoke_urls.txt` (STOCK_URL)
+- Health: `GET {STOCK_URL}/up`
+
+Permanent: use the Render blueprint above (Postgres free + Docker web).
