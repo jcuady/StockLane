@@ -57,6 +57,15 @@ ls public/build
 composer install --no-dev --optimize-autoloader
 ```
 
+## Troubleshooting
+
+| Error | Fix |
+|-------|-----|
+| `composer: command not found` (exit 127) | Remove `composer install` from **Project Settings → Install Command**. Use `npm ci` only; `vercel-php` runs Composer during the PHP function build. |
+| `No Output Directory named "dist"` | Set **Output Directory** to `public` and **Root Directory** to `backend`. Ensure `framework: null` in `vercel.json`. |
+| Stale Composer lock / vendor cache | **Deployments → Redeploy → uncheck "Use existing Build Cache"**. |
+| Dashboard overrides `vercel.json` | In **Build & Development Settings**, clear custom Install/Build/Output fields or match the table above exactly. |
+
 ## One-click Render (permanent production)
 
 https://render.com/deploy?repo=https://github.com/jcuady/StockLane
