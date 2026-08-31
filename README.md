@@ -136,6 +136,12 @@ Render Dashboard -> New -> Blueprint -> connect jcuady/StockLane
 
 Local/Docker still use MySQL + Redis when you want the full LAMP/queue shape.
 
+### Vercel (demo SPA + Laravel serverless)
+
+Vercel is **not** a static `dist` app. Configure **Root Directory = `backend`** and use `backend/vercel.json` (`outputDirectory: public`).
+
+See [docs/DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md) for env vars and limitations. **Render** remains the full-stack production path.
+
 ## GitHub-ready
 
 - ASCII punctuation only in docs and configs
